@@ -4,6 +4,9 @@
 #include <string>
 #include <functional>
 #include <thread>
+#include "stack.h"
+#include "queue.h"
+#include<atomic>
 
 using namespace std;
 
@@ -52,8 +55,57 @@ void parallel_accumulate( )
     std::cout<< "Total: " << total << std::endl;
 }
 
-int main()
+void stack_func()
 {
-    parallel_accumulate();
+    threadsafe_stack stack;
+
+    std::vector<thread> threads(6);
+
+    for(int i=0; i<3; i++)
+    {
+        threads[i] = thread( &threadsafe_stack::push, &stack, i );
+    }
+    int popped = 0;
+
+    for(int i=3; i<6; i++)
+    {
+        threads[i] = thread( &threadsafe_stack::pop, &stack, std::ref(popped) );
+        std::cout << "Pop: " << popped << std::endl;
+    }
+
+    for(int i=0; i<6; i++)
+    {
+        threads[i].join();
+    }
 }
 
+void
+queue_func()
+{
+    ThreadSafeQueue queue;
+    std::vector<thread> threads(20);
+    std::mutex mut;
+
+    std::atomic<int> result;
+
+    for( int i=0; i< 5; i++)
+    {
+        threads[i] = thread( &ThreadSafeQueue::push, &queue, i);
+    }
+    for( int i=5; i< 10; i++)
+    {
+        threads[i] = thread( &ThreadSafeQueue::wait_pop_and_accumulate, &queue, std::ref(result));
+    }
+    for(int i=0; i<10; i++)
+    {
+        threads[i].join();
+    }
+    cout<< "Result: " << result << std::endl;
+}
+
+int main()
+{
+    queue_func();
+    // stack_func();
+    //parallel_accumulate();
+}
