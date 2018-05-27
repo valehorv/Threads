@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <thread>
+#include "stack.h"
 
 using namespace std;
 
@@ -54,6 +55,25 @@ void parallel_accumulate( )
 
 int main()
 {
-    parallel_accumulate();
-}
+    threadsafe_stack stack;
 
+    std::vector<thread> threads(6);
+
+    for(int i=0; i<3; i++)
+    {
+        threads[i] = thread( &threadsafe_stack::push, &stack, i );
+    }
+    int popped = 0;
+
+    for(int i=3; i<6; i++)
+    {
+        threads[i] = thread( &threadsafe_stack::pop, &stack, std::ref(popped) );
+        std::cout << "Pop: " << popped << std::endl;
+    }
+
+    for(int i=0; i<4; i++)
+    {
+        threads[i].join();
+    }
+    //parallel_accumulate();
+}
