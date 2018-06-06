@@ -72,7 +72,6 @@ void stack_func()
         threads[i] = thread( &threadsafe_stack::pop, &stack, std::ref(popped) );
         std::cout << "Pop: " << popped << std::endl;
     }
-
     for(int i=0; i<6; i++)
     {
         threads[i].join();
