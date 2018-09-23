@@ -6,7 +6,16 @@
 #include <thread>
 #include "stack.h"
 #include "queue.h"
-#include<atomic>
+#include <atomic>
+
+#include "dispatcher.h"
+#include "request.h"
+
+#include "deadlock.h"
+
+#include <csignal>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -102,9 +111,73 @@ queue_func()
     cout<< "Result: " << result << std::endl;
 }
 
-int main()
+struct info
 {
-    queue_func();
+    int a;
+    int b;
+};
+
+int
+sum( int s, const info& element )
+{
+    return (s + element.a );
+}
+
+sig_atomic_t signal_caught = 0;
+mutex log_mutex;
+
+void sigint_handler(int sig)
+{
+    signal_caught = 1;
+}
+
+void log_func(string text)
+{
+    log_mutex.lock();
+    cout << text << "\n";
+    log_mutex.unlock();
+}
+
+int main()
+{   
+/*    std::vector<info> v ={{1,1}, {2,2}, {3,3}};
+
+    auto s = std::accumulate( v.begin(), v.end(), 0, []( int s, const info& element )
+    {
+        return (s + element.a );
+    } );
+    std::cout<< "S: "<< s << std::endl;
+*/
+   // queue_func();
     // stack_func();
     //parallel_accumulate();
+/*
+    Dispatcher::init(10);
+
+    cout << "Init threads.\n";
+
+    int i = 0;
+    Request* r = 0;
+    while ( i < 50)
+    {
+        r = new Request();
+        r->set_value(i);
+        r->set_output(&log_func);
+        Dispatcher::add_request(r);
+        i++;
+    }
+
+    this_thread::sleep_for(chrono::seconds(5));
+
+    Dispatcher::stop();
+    */
+
+    Toy drums(std::string("drums")), sticks(std::string("sticks"));
+    Kid Johnny(std::string("Johnny")), Mike(std::string("Mike"));
+
+    thread t1( &Kid::play_drums, &Johnny, std::ref(drums), std::ref(sticks) );
+    thread t2( &Kid::play_drums, &Mike, std::ref(sticks), std::ref(drums) );
+
+    t1.join();
+    t2.join();
 }

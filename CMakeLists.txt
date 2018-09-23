@@ -6,7 +6,8 @@ project(test6 CXX)
 
 find_package (Threads)
 
-add_executable(${PROJECT_NAME} "main.cpp" "stack.cpp" "queue.cpp")
+add_executable(${PROJECT_NAME} "main.cpp" "stack.cpp" "queue.cpp" "dispatcher.cpp"
+    "request.cpp" "worker.cpp")
 
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
