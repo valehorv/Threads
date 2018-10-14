@@ -12,10 +12,13 @@
 #include "request.h"
 
 #include "deadlock.h"
+#include "btreecreator.h"
 
 #include <csignal>
 #include <thread>
 #include <chrono>
+
+#include <algorithm>
 
 using namespace std;
 
@@ -171,7 +174,7 @@ int main()
 
     Dispatcher::stop();
     */
-
+/* ------------------------Deadlock------------------------
     Toy drums(std::string("drums")), sticks(std::string("sticks"));
     Kid Johnny(std::string("Johnny")), Mike(std::string("Mike"));
 
@@ -180,4 +183,35 @@ int main()
 
     t1.join();
     t2.join();
+
+    ------------------------------------------------------- */
+
+    /* -----------------------------BTree ----------------------- */
+    BTreeCreator btree;
+    btree.create_btree();
+    vector<int> values = {21, 25, 5, 31};
+    for( auto val : values)
+    {
+       auto found = btree.search_value_in_tree( val );
+       std::cout << (found?"":"Didn't") << " found value: " << val << std::endl ;
+    }
+
+    btree.breadth_first();
+
+    btree.depth_first_inorder( &btree.m_nodes[0]);
+    btree.display_linear_tree("Depth inorder");
+
+    btree.depth_first_preorder( &btree.m_nodes[0]);
+    btree.display_linear_tree("Depth preorder");
+
+    btree.depth_first_postorder( &btree.m_nodes[0]);
+    btree.display_linear_tree("Depth postorder");
+
+    btree.morris_inorder( &btree.m_nodes[0]);
+    btree.display_linear_tree("Morris inorder");
+
+    btree.create_node_threads();
+    btree.threaded_inorder( &btree.m_nodes[0] );
+    btree.display_linear_tree("Threaded inorder");
+
 }
